@@ -25,11 +25,12 @@ class Datagrid
             return '';
         }
 
-        // prepare data
+        // prepare columns and data
         if (0 === count($columns)) {
             $columns = $this->getDefaultColumns($data[0] ?? []);
         }
         $data = array_map(fn($item) => array_intersect_key($item, $columns), $data);
+        $data = static::reArrangeData($data, array_keys($columns));
 
         // generate html
         $html = str_replace('{table_class}', $this->getTableCLass(), static::HTML_TABLE);
@@ -55,7 +56,7 @@ class Datagrid
         return str_replace('{content}', $this->getTr($columns, true), static::HTML_HTML_THEAD);
     }
 
-    public function getTBody(array $data): string
+    public function getTBody(array $data, array $columns = []): string
     {
         $rows = [];
         foreach ($data as $row) {
@@ -108,5 +109,16 @@ class Datagrid
     public function getTableHeaderCaps(): string
     {
         return $this->headerCaps;
+    }
+
+    private static function reArrangeData(array $data, array $columns): array
+    {
+        return array_map(function($item) use ($columns) {
+            $display = [];
+            foreach ($columns as $column) {
+                $display[$column] = $item[$column];
+            }
+            return $display;
+        }, $data);
     }
 }
