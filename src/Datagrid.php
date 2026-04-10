@@ -20,15 +20,18 @@ class Datagrid
 
     public function getTable(array $data, array $columns = []): string
     {
-        if (0 === count($data)) return '';
+        // validation
+        if (0 === count($data)) {
+            return '';
+        }
+
+        // prepare data
         if (0 === count($columns)) {
             $columns = $this->getDefaultColumns($data[0] ?? []);
         }
+        $data = array_map(fn($item) => array_intersect_key($item, $columns), $data);
 
-        array_walk($data, function (&$item) use ($columns) {
-            $item = array_intersect_key($item, $columns);
-        });
-
+        // generate html
         $html = str_replace('{table_class}', $this->getTableCLass(), static::HTML_TABLE);
         $html = str_replace('{thead}', $this->getTHead($columns), $html);
         $html = str_replace('{tbody}', $this->getTBody($data), $html);
